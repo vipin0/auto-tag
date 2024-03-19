@@ -46,7 +46,7 @@ class AutotagAutoscaleWorker extends AutotagDefaultWorker {
     return tagConfig.map(tag => Object.assign({}, tag, {
       ResourceId: this.getAutoscalingGroupName(),
       ResourceType: 'auto-scaling-group',
-      PropagateAtLaunch: false,
+      PropagateAtLaunch: true,
     }));
   }
 }

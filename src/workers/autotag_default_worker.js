@@ -3,7 +3,8 @@ import { STS } from "@aws-sdk/client-sts";
 import SETTINGS from '../autotag_settings.js';
 
 export const AUTOTAG_TAG_NAME_PREFIX = 'AutoTag_';
-const AUTOTAG_CREATOR_TAG_NAME = `${AUTOTAG_TAG_NAME_PREFIX}Creator`;
+// const AUTOTAG_CREATOR_TAG_NAME = `${AUTOTAG_TAG_NAME_PREFIX}Creator`;
+const AUTOTAG_CREATOR_TAG_NAME = "email";
 const AUTOTAG_CREATE_TIME_TAG_NAME = `${AUTOTAG_TAG_NAME_PREFIX}CreateTime`;
 const AUTOTAG_INVOKED_BY_TAG_NAME = `${AUTOTAG_TAG_NAME_PREFIX}InvokedBy`;
 const ROLE_PREFIX = 'arn:aws:iam::';
@@ -131,12 +132,17 @@ class AutotagDefaultWorker {
     // prefer the this field for Federated Users
     // because it is the actual aws user and isn't truncated
     if (this.event.userIdentity.type === 'FederatedUser'
-        && this.event.userIdentity.sessionContext
-        && this.event.userIdentity.sessionContext.sessionIssuer
-        && this.event.userIdentity.sessionContext.sessionIssuer.arn) {
+      && this.event.userIdentity.sessionContext
+      && this.event.userIdentity.sessionContext.sessionIssuer
+      && this.event.userIdentity.sessionContext.sessionIssuer.arn) {
       return this.event.userIdentity.sessionContext.sessionIssuer.arn;
+    } else if (this.event.userIdentity.type === 'AssumedRole'
+      && this.event.userIdentity.arn) {
+      let arr = this.event.userIdentity.arn.split("/");
+      return arr[arr.length - 2]
     } else {
-      return this.event.userIdentity.arn;
+      let arr = this.event.userIdentity.arn.split("/");
+      return arr[arr.length - 1]
     }
   }
 
