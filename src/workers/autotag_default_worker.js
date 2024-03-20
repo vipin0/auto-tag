@@ -5,7 +5,7 @@ import { IAMClient, ListRoleTagsCommand, ListUserTagsCommand } from "@aws-sdk/cl
 
 export const AUTOTAG_TAG_NAME_PREFIX = 'AutoTag_';
 // const AUTOTAG_CREATOR_TAG_NAME = `${AUTOTAG_TAG_NAME_PREFIX}Creator`;
-const AUTOTAG_CREATOR_TAG_NAME = "email";
+const AUTOTAG_CREATOR_TAG_NAME = "_email";
 const AUTOTAG_CREATE_TIME_TAG_NAME = `${AUTOTAG_TAG_NAME_PREFIX}CreateTime`;
 const AUTOTAG_INVOKED_BY_TAG_NAME = `${AUTOTAG_TAG_NAME_PREFIX}InvokedBy`;
 const ROLE_PREFIX = 'arn:aws:iam::';
