@@ -1,6 +1,7 @@
 import get from 'lodash/get.js';
 import { STS } from "@aws-sdk/client-sts";
 import SETTINGS from '../autotag_settings.js';
+import { IAMClient, ListRoleTagsCommand, ListUserTagsCommand } from "@aws-sdk/client-iam";
 
 export const AUTOTAG_TAG_NAME_PREFIX = 'AutoTag_';
 // const AUTOTAG_CREATOR_TAG_NAME = `${AUTOTAG_TAG_NAME_PREFIX}Creator`;
@@ -11,6 +12,8 @@ const ROLE_PREFIX = 'arn:aws:iam::';
 const ROLE_SUFFIX = ':role';
 // const MASTER_ROLE_NAME = 'AutoTagMasterRole';
 const MASTER_ROLE_PATH = '/gorillastack/autotag/master/';
+
+
 
 class AutotagDefaultWorker {
   constructor(event, s3Region) {
@@ -139,10 +142,11 @@ class AutotagDefaultWorker {
     } else if (this.event.userIdentity.type === 'AssumedRole'
       && this.event.userIdentity.arn) {
       let arr = this.event.userIdentity.arn.split("/");
-      return arr[arr.length - 2]
+      let roleName =  arr[arr.length - 2]
+      return this.getIamIdentityTags(roleName=roleName).get("email");
     } else {
       let arr = this.event.userIdentity.arn.split("/");
-      return arr[arr.length - 1]
+      return arr[arr.length - 1];
     }
   }
 
@@ -160,6 +164,23 @@ class AutotagDefaultWorker {
 
   getInvokedByTagValue() {
     return (this.event.userIdentity && this.event.userIdentity.invokedBy ? this.event.userIdentity.invokedBy : false);
+  }
+  
+  getIamIdentityTags(userName=null, roleName=null){
+    const client = new IAMClient();
+    const response;
+    if (userName === null) {
+        response = await client.send(new ListUserTagsCommand({UserName:userName}));
+    }
+    else if (roleName === null){
+        response = await client.send(new ListRoleTagsCommand({RoleName:roleName}));
+    }
+    let tagsArray = response["Tags"]
+    const tagsMap = new Map();
+    tagsArray.forEach(tag => {
+        tagsMap.set(tag.Key, tag.Value);
+    });
+    return tagsMap
   }
 
   getCustomTags() {
